@@ -8,6 +8,7 @@ int main() {
     for (IPlayer &player : game.players){
         player.sendSizeBoard(game.board);
     }
+    game.updateBoard();
 
     Move move;
     game.players[game.players.size()-1].receiveMove(move);
