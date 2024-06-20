@@ -23,6 +23,10 @@ public:
     bool isFlag() const{
         return flag;
     }
+
+    void removeFlag(){
+        flag = false;
+    }
 };
 
 #endif //MINESWEEPER_MOVE_H

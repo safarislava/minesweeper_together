@@ -7,12 +7,20 @@
 
 
 class Game {
+public:
     Board board;
     std::vector<IPlayer> players;
 
     void updateBoard() {
         std::vector<std::vector<char>> boardView = board.getView();
+        for (IPlayer &player : players){
+            player.sendBoard(boardView);
+        }
+        printBoard();
+    }
 
+    void printBoard(){
+        std::vector<std::vector<char>> boardView = board.getView();
         for (int y = 0; y < boardView.size(); y++){
             for (int x = 0; x < boardView.size(); x++){
                 std::cout << boardView[y][x] << " ";
@@ -45,31 +53,9 @@ class Game {
         return true;
     }
 
-public:
-    void start(){
+    void init(){
         board.init(10);
         players.emplace_back();
-    }
-
-    void process(){
-        for (IPlayer &player : players){
-            player.sendSizeBoard(board);
-        }
-        board.addBombCells(40);
-
-        while (true){
-            for (IPlayer &player : players){
-                updateBoard();
-                std::vector<std::vector<char>> viewBoard = board.getView();
-                for (IPlayer &player : players){
-                    player.sendBoard(viewBoard);
-                }
-
-                Move move;
-                player.receiveMove(move);
-                if (isAvailableMove(move)) board.apply(move);
-            }
-        }
     }
 };
 

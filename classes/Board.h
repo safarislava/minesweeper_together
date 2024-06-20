@@ -19,7 +19,7 @@ public:
         countBombsAround.resize(sizeBoard, std::vector<int>(sizeBoard));
     }
 
-    void apply(Move move){
+    void apply(Move move, bool isFirstMove = false){
         if (move.isFlag()){
             content[move.getY()][move.getX()].setFlag();
             return;
@@ -27,6 +27,12 @@ public:
 
         if (content[move.getY()][move.getX()].isBombCell()){
             content[move.getY()][move.getX()].setOpen();
+        }
+
+        if (isFirstMove){
+            content[move.getY()][move.getX()].setOpen();
+            addBombCells(40);
+            content[move.getY()][move.getX()].setClosed();
         }
 
         openCellsWithoutBombs(move.getX(), move.getY());
@@ -60,7 +66,7 @@ public:
         int countAddedBombs = 0;
         while (countAddedBombs != countNewBombs){
             int x = distribution(randomGenerator) % sizeBoard, y = distribution(randomGenerator) % sizeBoard;
-            if (!content[y][x].isBombCell()){
+            if (!content[y][x].isBombCell() and !content[y][x].isOpenned()){
                 content[y][x].setBombCell();
                 countAddedBombs++;
 

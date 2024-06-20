@@ -15,6 +15,10 @@ public:
         openned = true;
     }
 
+    void setClosed(){
+        openned = false;
+    }
+
     bool isBombCell() const{
         return bombCell;
     }
