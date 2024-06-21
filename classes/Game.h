@@ -1,22 +1,34 @@
 #ifndef MINESWEEPER_GAME_H
 #define MINESWEEPER_GAME_H
 #include <iostream>
+#include <future>
 #include "Move.h"
 #include "Board.h"
 #include "IPlayer.h"
+#include "SocketManager.h"
 
 
 class Game {
 public:
     Board board;
+    SocketManager socketManager;
     std::vector<IPlayer> players;
+
+    void init(){
+        board.init(10);
+        socketManager.init();
+    }
+
+    void addPlayer(){
+        IPlayer player(socketManager.serverSocket);
+        players.emplace_back(player);
+    }
 
     void updateBoard() {
         std::vector<std::vector<char>> boardView = board.getView();
         for (IPlayer &player : players){
             player.sendBoard(boardView);
         }
-        printBoard();
     }
 
     void printBoard(){
@@ -51,11 +63,6 @@ public:
         }
 
         return true;
-    }
-
-    void init(){
-        board.init(10);
-        players.emplace_back();
     }
 };
 

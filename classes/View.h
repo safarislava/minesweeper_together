@@ -7,8 +7,9 @@
 
 
 class View{
-    const int width = 1000;
-    const int height = 1000;
+    const int width = 800;
+    const int height = 600;
+    int cellSize;
 
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
@@ -30,41 +31,43 @@ class View{
         return texture;
     }
 
-    static void ApplySurface(int x, int y, SDL_Texture *tex, SDL_Renderer *rend){
-        SDL_Rect pos{.x=x, .y=y, .w = 100, .h = 100};
+    void ApplySurface(int x, int y, int w, int h, SDL_Texture *tex, SDL_Renderer *rend){
+        SDL_Rect pos{.x=x, .y=y, .w = w, .h = h};
         SDL_RenderCopy(rend, tex, nullptr, &pos);
     }
 
 public:
     void setBoard(std::vector<std::vector<char>> &newBoard){
         board = newBoard;
+        cellSize = height / static_cast<int>(board.size());
     }
 
     void update(){
         SDL_RenderClear(renderer);
+        ApplySurface(0, 0, width, height, textures["Background"], renderer);
 
-        for (int y = 0; y < 10; y++){
-            for (int x = 0; x < 10; x++){
+        for (int y = 0; y < board.size(); y++){
+            for (int x = 0; x < board.size(); x++){
                 std::string state;
                 if (board[y][x] == '-') state = "Closed";
                 else if (board[y][x] == '+') state = "Flag";
                 else if (board[y][x] == '*') state = "Bomb";
                 else state = board[y][x];
 
-                ApplySurface(100*x, 100*y, textures["Cell" + state], renderer);
+                ApplySurface(cellSize * x, cellSize * y, cellSize, cellSize, textures["Cell" + state], renderer);
             }
         }
 
         SDL_RenderPresent(renderer);
     }
 
-    void init(){
+    void init(int sizeBoard){
         if (SDL_Init(SDL_INIT_EVERYTHING) != 0){
             std::cout << "SDL_Init Error: " << SDL_GetError() << std::endl;
             return;
         }
 
-        window = SDL_CreateWindow("Hello World!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
+        window = SDL_CreateWindow("Minesweeper Together", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, SDL_WINDOW_SHOWN);
         if (window == nullptr){
             std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
             return;
@@ -89,6 +92,9 @@ public:
         textures["CellClosed"] = LoadImage("../res/images/CellClosed.bmp");
         textures["CellExploded"] = LoadImage("../res/images/CellExploded.bmp");
         textures["CellFlag"] = LoadImage("../res/images/CellFlag.bmp");
+        textures["Background"] = LoadImage("../res/images/Background.bmp");
+
+        board.assign(sizeBoard, std::vector<char>(sizeBoard, '-'));
     }
 
     void exit(){
@@ -98,6 +104,11 @@ public:
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
         SDL_Quit();
+    }
+
+    void getCellCoordinate(int &x, int &y, int px, int py){
+        x = px / cellSize;
+        y = py / cellSize;
     }
 };
 

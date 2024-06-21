@@ -44,32 +44,42 @@ public:
         send(clientSocket, buffer, sizeof buffer, 0);
     }
 
-    void receiveSizeBoard(int &sizeBoard){
+    void receiveManager(View &view, int &sizeBoard, bool &doMove){
         while (true){
             int status = recv(clientSocket, buffer, sizeof buffer, 0);
             if (status >= 0){
-                memcpy(&sizeBoard, buffer, sizeof sizeBoard);
+                int id = buffer[0];
+                switch (id){
+                    case 3:
+                        doMove = !doMove;
+                        break;
+                    case 1:
+                        receiveSizeBoard(sizeBoard);
+                        break;
+                    case 2:
+                        std::vector<std::vector<char>> boardView;
+                        receiveBoard(boardView, sizeBoard);
+                        view.setBoard(boardView);
+                        break;
+                }
                 return;
             }
         }
+    }
+
+    void receiveSizeBoard(int &sizeBoard){
+        memcpy(&sizeBoard, buffer + 1, sizeof sizeBoard);
     }
 
     void receiveBoard(std::vector<std::vector<char>> &boardView, int sizeBoard){
         boardView.assign(sizeBoard, std::vector<char>(sizeBoard));
         char transView[sizeBoard][sizeBoard];
 
-        while (true){
-            int status = recv(clientSocket, buffer, sizeof buffer, 0);
-            if (status >= 0){
-                int size = sizeof transView;
-                memcpy(&transView, buffer, size);
+        memcpy(&transView, buffer + 1, sizeof transView);
 
-                for (int i = 0; i < sizeBoard; i++){
-                    for (int j = 0; j < sizeBoard; j++){
-                        boardView[i][j] = transView[i][j];
-                    }
-                }
-                return;
+        for (int i = 0; i < sizeBoard; i++){
+            for (int j = 0; j < sizeBoard; j++){
+                boardView[i][j] = transView[i][j];
             }
         }
     }

@@ -4,6 +4,7 @@ int main() {
     Game game;
 
     game.init();
+    game.addPlayer();
 
     for (IPlayer &player : game.players){
         player.sendSizeBoard(game.board);
@@ -11,16 +12,41 @@ int main() {
     game.updateBoard();
 
     Move move;
-    game.players[game.players.size()-1].receiveMove(move);
+    IPlayer playerFirst = game.players[game.players.size() - 1];
+    playerFirst.switchDoMove(); // true
+
+    playerFirst.receiveMove(move);
+    while (!game.isAvailableMove(move)){
+        playerFirst.receiveMove(move);
+    }
+
     move.removeFlag();
-    if (game.isAvailableMove(move)) game.board.apply(move, true);
+    game.board.apply(move, true);
+    game.updateBoard();
+
+    playerFirst.switchDoMove(); // false
 
     while (!game.players.empty()){
         for (IPlayer &player : game.players){
+            player.switchDoMove(); // true
+
+            auto availableMove = [&game, &player, &move]{
+                player.receiveMove(move);
+                while (!game.isAvailableMove(move)){
+                    player.receiveMove(move);
+                }
+            };
+
+            availableMove();
+            while (move.isFlag()){
+                game.board.apply(move);
+                game.updateBoard();
+                availableMove();
+            }
+            game.board.apply(move);
             game.updateBoard();
 
-            player.receiveMove(move);
-            if (game.isAvailableMove(move)) game.board.apply(move);
+            player.switchDoMove(); // false
         }
     }
 

@@ -3,24 +3,24 @@
 #include <future>
 #undef main
 
+
 int main() {
     IGame game;
     View view;
-    view.init();
-
+    SDL_Event e;
+    bool quit = false;
+    bool doMove = false;
     int sizeBoard;
-    game.receiveSizeBoard(sizeBoard);
 
-    std::future<void> receivingBoard = std::async([&game, &view, &sizeBoard]{
-        while (true){
-            std::vector<std::vector<char>> boardView;
-            game.receiveBoard(boardView, sizeBoard);
-            view.setBoard(boardView);
+    game.receiveManager(view, sizeBoard, doMove);
+    view.init(sizeBoard);
+
+    std::future<void> receiving = std::async([&quit, &game, &view, &sizeBoard, &doMove]{
+        while (!quit){
+            game.receiveManager(view, sizeBoard, doMove);
         }
     });
 
-    SDL_Event e;
-    bool quit = false;
     while (!quit)
     {
         while (SDL_PollEvent(&e))
@@ -30,16 +30,18 @@ int main() {
                 quit = true;
             }
             if (e.type == SDL_MOUSEBUTTONDOWN){
-                bool isFlag = e.button.button == SDL_BUTTON_RIGHT;
-                int px = e.button.x, py = e.button.y;
-                int x = px  / 100, y = py / 100;
-                game.sendMove({x, y, isFlag});
+                if (doMove) {
+                    bool isFlag = e.button.button == SDL_BUTTON_RIGHT;
+                    int x, y;
+                    view.getCellCoordinate(x, y, e.button.x, e.button.y);
+                    game.sendMove({x, y, isFlag});
+                }
             }
+
         }
         view.update();
     }
 
-    receivingBoard.get();
     view.exit();
 
     return 0;

@@ -14,24 +14,11 @@
 
 
 class IPlayer{
-    char buffer[1024];
+    char buffer[1024]{};
     int clientSocket;
 
 public:
-    IPlayer(){
-        int serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-        sockaddr_in serverAddress{};
-        serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(1234);
-        in_addr ip_to_num{};
-        inet_pton(AF_INET, "192.168.31.216", &ip_to_num);
-        serverAddress.sin_addr = ip_to_num;
-
-        bind(serverSocket, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
-
-        listen(serverSocket, SOMAXCONN);
-
+    IPlayer(int &serverSocket){
         clientSocket = accept(serverSocket, nullptr, nullptr);
     }
 
@@ -48,7 +35,9 @@ public:
 
     void sendSizeBoard(Board &board){
         int sizeBoard = board.getSizeBoard();
-        memcpy(buffer, &sizeBoard, sizeof sizeBoard);
+        memset(buffer, 0, 1024);
+        buffer[0] = 1;
+        memcpy(buffer + 1, &sizeBoard, sizeof(sizeBoard));
         send(clientSocket, buffer, sizeof buffer, 0);
     }
 
@@ -61,8 +50,15 @@ public:
             }
         }
 
-        int size = sizeof transView;
-        memcpy(buffer, &transView, size);
+        memset(buffer, 0, 1024);
+        buffer[0] = 2;
+        memcpy(buffer + 1, &transView, sizeof transView);
+        send(clientSocket, buffer, sizeof buffer, 0);
+    }
+
+    void switchDoMove(){
+        memset(buffer, 0, 1024);
+        buffer[0] = 3;
         send(clientSocket, buffer, sizeof buffer, 0);
     }
 };
