@@ -5,6 +5,10 @@
 #include <vector>
 #include <map>
 
+const char CLOSED = '-';
+const char BOMB = '*';
+const char FLAG = '+';
+
 
 class View{
     const int width = 800;
@@ -37,8 +41,22 @@ class View{
     }
 
 public:
+    void setFlagCell(int x, int y){
+        if (!(0 <= x and x <= board.size()) or !(0 <= y and y <= board.size())) return;
+
+        if (board[y][x] == CLOSED) board[y][x] = FLAG;
+        else if (board[y][x] == FLAG) board[y][x] = CLOSED;
+    }
+
     void setBoard(std::vector<std::vector<char>> &newBoard){
-        board = newBoard;
+        for (int y = 0; y < board.size(); y++){
+            for (int x = 0; x < board.size(); x++){
+                if (!(board[y][x] == FLAG and newBoard[y][x] == CLOSED)){
+                    board[y][x] = newBoard[y][x];
+                }
+            }
+        }
+
         cellSize = height / static_cast<int>(board.size());
     }
 
@@ -49,9 +67,9 @@ public:
         for (int y = 0; y < board.size(); y++){
             for (int x = 0; x < board.size(); x++){
                 std::string state;
-                if (board[y][x] == '-') state = "Closed";
-                else if (board[y][x] == '+') state = "Flag";
-                else if (board[y][x] == '*') state = "Bomb";
+                if (board[y][x] == CLOSED) state = "Closed";
+                else if (board[y][x] == FLAG) state = "Flag";
+                else if (board[y][x] == BOMB) state = "Bomb";
                 else state = board[y][x];
 
                 ApplySurface(cellSize * x, cellSize * y, cellSize, cellSize, textures["Cell" + state], renderer);

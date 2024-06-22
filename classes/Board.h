@@ -55,7 +55,6 @@ public:
         }
     }
 
-    // TODO добавлять мины после первого хода
     void addBombCells(int countNewBombs){
         countBombs += countNewBombs;
 

@@ -5,6 +5,7 @@ int main() {
 
     game.init();
     game.addPlayer();
+    //game.addPlayer();
 
     for (IPlayer &player : game.players){
         player.sendSizeBoard(game.board);

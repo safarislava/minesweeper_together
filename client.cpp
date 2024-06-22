@@ -9,6 +9,23 @@ int main() {
     View view;
     SDL_Event e;
     bool quit = false;
+
+    // Menu
+//    while (!quit)
+//    {
+//        while (SDL_PollEvent(&e))
+//        {
+//            if (e.type == SDL_QUIT)
+//            {
+//                quit = true;
+//            }
+//            if (e.type == SDL_MOUSEBUTTONDOWN){
+//
+//            }
+//        }
+//        view.update();
+//    }
+
     bool doMove = false;
     int sizeBoard;
 
@@ -21,6 +38,7 @@ int main() {
         }
     });
 
+    // Game
     while (!quit)
     {
         while (SDL_PollEvent(&e))
@@ -30,19 +48,21 @@ int main() {
                 quit = true;
             }
             if (e.type == SDL_MOUSEBUTTONDOWN){
-                if (doMove) {
-                    bool isFlag = e.button.button == SDL_BUTTON_RIGHT;
-                    int x, y;
-                    view.getCellCoordinate(x, y, e.button.x, e.button.y);
+                bool isFlag = e.button.button == SDL_BUTTON_RIGHT;
+                int x, y;
+                view.getCellCoordinate(x, y, e.button.x, e.button.y);
+
+                if (isFlag){
+                    view.setFlagCell(x, y);
+                }
+                else if (doMove) {
                     game.sendMove({x, y, isFlag});
                 }
             }
-
         }
         view.update();
     }
 
     view.exit();
-
     return 0;
 }
